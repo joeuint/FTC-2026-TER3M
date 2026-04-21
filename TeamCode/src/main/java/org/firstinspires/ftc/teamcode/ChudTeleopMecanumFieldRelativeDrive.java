@@ -137,6 +137,9 @@ public class ChudTeleopMecanumFieldRelativeDrive extends OpMode {
 
     // Thanks to FTC16072 for sharing this code!!
     public void drive(double forward, double right, double rotate) {
+        telemetry.addData("forward", forward);
+        telemetry.addData("right", right);
+        telemetry.addData("forward", forward);
         // This calculates the power needed for each wheel based on the amount of forward,
         // strafe right, and rotate
         double frontLeftPower = forward + right + rotate;
