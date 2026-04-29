@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.hardware.IMU;
 
 @TeleOp
 public class Teleop extends LinearOpMode {
@@ -20,6 +21,7 @@ public class Teleop extends LinearOpMode {
 
 @Override
     public void runOpMode() {
+        telemetry.addData("Mode", "Robot");
 
         frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRightDrive = hardwareMap.get(DcMotor.class, "frontRight");
@@ -43,9 +45,11 @@ public class Teleop extends LinearOpMode {
     waitForStart();
         while(opModeIsActive()) {
             if (gamepad1.aWasPressed()){
+                telemetry.addData("Mode", "Field");
                 isFieldOriented = true;
             }
             else if (gamepad1.bWasPressed()) {
+                telemetry.addData("Mode", "Robot");
                 isFieldOriented = false;
             }
             if (isFieldOriented) {
@@ -54,6 +58,8 @@ public class Teleop extends LinearOpMode {
             else{
                 drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
+            telemetry.update();
+
             if (gamepad1.y){
                     imu.resetYaw();
             }
