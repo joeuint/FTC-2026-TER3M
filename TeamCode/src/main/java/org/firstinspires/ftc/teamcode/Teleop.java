@@ -29,14 +29,13 @@ public class Teleop extends LinearOpMode {
             if (gamepad1.aWasPressed()){
                 isFieldOriented = true;
             }
+            else if (gamepad1.bWasPressed()) {
+                isFieldOriented = false;
+            }
             if (isFieldOriented) {
                 driveFieldOriented(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
-
-            if (gamepad1.bWasPressed()){
-                isFieldOriented = false;
-            }
-            if(!isFieldOriented){
+            else{
                 drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
 
