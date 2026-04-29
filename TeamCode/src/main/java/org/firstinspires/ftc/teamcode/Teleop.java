@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 public class Teleop extends LinearOpMode {
@@ -11,6 +15,7 @@ public class Teleop extends LinearOpMode {
     DcMotor backLeftDrive;
     DcMotor backRightDrive;
 
+    IMU imu;
     boolean isFieldOriented = false;
 
 @Override
@@ -24,7 +29,18 @@ public class Teleop extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        waitForStart();
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
+            RevHubOrientationOnRobot.LogoFacingDirection.UP;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection =
+            RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+
+        RevHubOrientationOnRobot orientationOnRobot = new
+            RevHubOrientationOnRobot(logoDirection, usbDirection);
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
+
+
+    waitForStart();
         while(opModeIsActive()) {
             if (gamepad1.aWasPressed()){
                 isFieldOriented = true;
@@ -38,7 +54,9 @@ public class Teleop extends LinearOpMode {
             else{
                 drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
-
+            if (gamepad1.y){
+                    imu.resetYaw();
+            }
         }
     }
     public void drive(double forward, double right, double rotate) {
@@ -54,7 +72,12 @@ public class Teleop extends LinearOpMode {
     }
 
     public void driveFieldOriented(double forward, double right, double rotate){
-
+        double theta = Math.atan2(forward, right);
+        double r = Math.hypot(right, forward);
+        theta = AngleUnit.normalizeRadians(theta - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+        double newForward = r * Math.sin(theta);
+        double newRight = r * Math.cos(theta);
+        drive(newForward, newRight, rotate);
     }
 
 }
