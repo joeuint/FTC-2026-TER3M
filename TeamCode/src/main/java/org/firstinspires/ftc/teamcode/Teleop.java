@@ -66,7 +66,7 @@ public class Teleop extends LinearOpMode {
             telemetry.update();
 
             if (gamepad1.y){
-                    imu.resetYaw();
+                imu.resetYaw();
             }
         }
     }
