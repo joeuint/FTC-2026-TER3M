@@ -58,10 +58,10 @@ public class Teleop extends LinearOpMode {
                 isFieldOriented = false;
             }
             if (isFieldOriented) {
-                driveFieldOriented(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
             else{
-                drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
             telemetry.update();
 
