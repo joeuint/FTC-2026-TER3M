@@ -31,6 +31,11 @@ public class Teleop extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
             RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -53,15 +58,15 @@ public class Teleop extends LinearOpMode {
                 isFieldOriented = false;
             }
             if (isFieldOriented) {
-                driveFieldOriented(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
             else{
-                drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
             }
             telemetry.update();
 
             if (gamepad1.y){
-                    imu.resetYaw();
+                imu.resetYaw();
             }
         }
     }
