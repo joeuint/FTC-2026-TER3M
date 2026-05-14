@@ -58,6 +58,12 @@ public class REVColourDistanceSensor extends LinearOpMode {
      */
     ColorSensor sensorColor;
     DistanceSensor sensorDistance;
+    double distance = 2.5;
+    double greenHue = 162;
+    double purpleHue = 230;
+
+    double threshold = (greenHue+purpleHue)/2;
+
 
     @Override
     public void runOpMode() {
@@ -98,13 +104,25 @@ public class REVColourDistanceSensor extends LinearOpMode {
                     hsvValues);
 
             // send the info back to driver station using telemetry function.
-            telemetry.addData("Distance (cm)",
+                    telemetry.addData("Distance (cm)",
                     String.format(Locale.US, "%.02f", sensorDistance.getDistance(DistanceUnit.CM)));
             telemetry.addData("Alpha", sensorColor.alpha());
             telemetry.addData("Red  ", sensorColor.red());
             telemetry.addData("Green", sensorColor.green());
             telemetry.addData("Blue ", sensorColor.blue());
             telemetry.addData("Hue", hsvValues[0]);
+
+
+            if (sensorDistance.getDistance(DistanceUnit.CM) <= distance){
+                if (hsvValues[0] <= threshold){
+                    telemetry.addData("Colour", "Green");
+                }
+                else if (hsvValues[0] >= threshold ) {
+                    telemetry.addData("Colour", "Purple");
+                }
+            }
+
+
 
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
