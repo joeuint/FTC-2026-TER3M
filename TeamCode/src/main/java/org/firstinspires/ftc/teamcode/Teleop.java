@@ -1,17 +1,27 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.ftccommon.SoundPlayer;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+import java.util.Optional;
 
 @TeleOp
 public class Teleop extends LinearOpMode {
+    AprilTagProcessor aprilTag;
+    VisionPortal visionPortal;
+
     DcMotor frontLeftDrive;
     DcMotor frontRightDrive;
     DcMotor backLeftDrive;
@@ -20,8 +30,52 @@ public class Teleop extends LinearOpMode {
     IMU imu;
     boolean isFieldOriented = false;
 
-@Override
+    private void initApriltag() {
+        aprilTag = new AprilTagProcessor.Builder()
+                .build();
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        builder.enableLiveView(true);
+
+        builder.addProcessor(aprilTag);
+
+        visionPortal = builder.build();
+    }
+
+    private Optional<String> checkObelisk(List<AprilTagDetection> tagDetections) {
+        for (AprilTagDetection tag : tagDetections) {
+            switch (tag.id) {
+                case 21:
+                    return Optional.of("GPP");
+                case 22:
+                    return Optional.of("PGP");
+                case 23:
+                    return Optional.of("PPG");
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
+    private void telemetryAprilTag() {
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+
+        for (AprilTagDetection tag : currentDetections) {
+            telemetry.addData("Detected ID", tag.id);
+        }
+
+        telemetry.addData("Obelisk", checkObelisk(currentDetections));
+
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+    }
+
+    @Override
     public void runOpMode() {
+        initApriltag();
+
         telemetry.addData("Mode", "Robot");
 
         frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -47,9 +101,11 @@ public class Teleop extends LinearOpMode {
             RevHubOrientationOnRobot(logoDirection, usbDirection);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
+        waitForStart();
 
-    waitForStart();
         while(opModeIsActive()) {
+            telemetryAprilTag();
+
             if (gamepad1.aWasPressed()){
                 telemetry.addData("Mode", "Field");
                 isFieldOriented = true;
