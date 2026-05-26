@@ -13,6 +13,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +33,10 @@ public class Teleop extends LinearOpMode {
 
     IMU imu;
     boolean isFieldOriented = false;
-
+//    private Position cameraPosition = new Position(DistanceUnit.INCH,
+//            0, 0, 0, 0);
+//    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
+//            0, -90, 0, 0);
     private void initApriltag() {
         aprilTag = new AprilTagProcessor.Builder()
                 .build();
@@ -65,6 +72,10 @@ public class Teleop extends LinearOpMode {
 
         for (AprilTagDetection tag : currentDetections) {
             telemetry.addData("Detected ID", tag.id);
+            if (tag.id == 20) {
+                telemetry.addData("YawPose", tag.ftcPose.yaw);
+            }
+
         }
 
         Optional<String> obelisk = checkObelisk(currentDetections);
