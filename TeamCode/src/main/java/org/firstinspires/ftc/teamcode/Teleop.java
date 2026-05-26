@@ -160,4 +160,17 @@ public class Teleop extends LinearOpMode {
         drive(newForward, newRight, rotate);
     }
 
+    public void autoAl(){
+        double setpoint = getYawToGoal();
+        double power = goalPID(setpoint);
+
+    }
+
+    private double goalPID(double setpoint) {
+
+    }
+
+    private double getYawToGoal() {
+
+    }
 }
