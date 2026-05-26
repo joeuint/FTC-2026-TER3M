@@ -67,7 +67,8 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("Detected ID", tag.id);
         }
 
-        telemetry.addData("Obelisk", checkObelisk(currentDetections));
+        Optional<String> obelisk = checkObelisk(currentDetections);
+        obelisk.ifPresent(s -> telemetry.addData("Obelisk", s));
 
         telemetry.addData("# AprilTags Detected", currentDetections.size());
     }
