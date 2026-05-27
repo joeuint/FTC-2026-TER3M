@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -13,9 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 import java.util.List;
@@ -32,11 +27,10 @@ public class Teleop extends LinearOpMode {
     DcMotor backRightDrive;
 
     IMU imu;
+
+    final double AUTO_ALIGN_BEARING_SETPOINT = 0.0;
+    final double AUTO_ALIGN_BEARING_ERROR = 4.0;
     boolean isFieldOriented = false;
-//    private Position cameraPosition = new Position(DistanceUnit.INCH,
-//            0, 0, 0, 0);
-//    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
-//            0, -90, 0, 0);
     private void initApriltag() {
         aprilTag = new AprilTagProcessor.Builder()
                 .build();
@@ -66,14 +60,20 @@ public class Teleop extends LinearOpMode {
         return Optional.empty();
     }
 
+    private void resetDrive() {
+        drive(0, 0, 0);
+    }
+
 
     private void telemetryAprilTag() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        resetDrive();
 
         for (AprilTagDetection tag : currentDetections) {
             telemetry.addData("Detected ID", tag.id);
             if (tag.id == 20) {
-                telemetry.addData("YawPose", tag.ftcPose.yaw);
+                telemetry.addData("Depot Bearing", tag.ftcPose.bearing);
+                autoAlign(tag.ftcPose.bearing);
             }
 
         }
@@ -126,12 +126,12 @@ public class Teleop extends LinearOpMode {
                 telemetry.addData("Mode", "Robot");
                 isFieldOriented = false;
             }
-            if (isFieldOriented) {
-                driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-            }
-            else{
-                drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-            }
+//            if (isFieldOriented) {
+//                driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+//            }
+//            else{
+//                drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+//            }
             telemetry.update();
 
             if (gamepad1.y){
@@ -160,17 +160,19 @@ public class Teleop extends LinearOpMode {
         drive(newForward, newRight, rotate);
     }
 
-    public void autoAl(){
-        double setpoint = getYawToGoal();
-        double power = goalPID(setpoint);
-
+    public void autoAlign(double bearing){
+        if (bearing > AUTO_ALIGN_BEARING_SETPOINT + AUTO_ALIGN_BEARING_ERROR) {
+            drive(0, 0, 0.3);
+        } else if (bearing < AUTO_ALIGN_BEARING_SETPOINT - AUTO_ALIGN_BEARING_ERROR) {
+            drive(0, 0, -0.3);
+        }
     }
 
-    private double goalPID(double setpoint) {
+//    private double goalPID(double setpoint) {
+//
+//    }
 
-    }
-
-    private double getYawToGoal() {
-
-    }
+//    private double getYawToGoal() {
+//
+//    }
 }
