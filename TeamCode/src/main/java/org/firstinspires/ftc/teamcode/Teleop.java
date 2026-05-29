@@ -31,6 +31,10 @@ public class Teleop extends LinearOpMode {
     final double AUTO_ALIGN_BEARING_SETPOINT = 0.0;
     final double AUTO_ALIGN_BEARING_ERROR = 4.0;
     boolean isFieldOriented = false;
+    boolean xpressed = false;
+
+    private double autoAlignBearing = 0.0;
+
     private void initApriltag() {
         aprilTag = new AprilTagProcessor.Builder()
                 .build();
@@ -73,7 +77,7 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("Detected ID", tag.id);
             if (tag.id == 20) {
                 telemetry.addData("Depot Bearing", tag.ftcPose.bearing);
-                autoAlign(tag.ftcPose.bearing);
+                autoAlignBearing = tag.ftcPose.bearing;
             }
 
         }
@@ -105,40 +109,51 @@ public class Teleop extends LinearOpMode {
 
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
-            RevHubOrientationOnRobot.LogoFacingDirection.UP;
+                RevHubOrientationOnRobot.LogoFacingDirection.UP;
         RevHubOrientationOnRobot.UsbFacingDirection usbDirection =
-            RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
 
         RevHubOrientationOnRobot orientationOnRobot = new
-            RevHubOrientationOnRobot(logoDirection, usbDirection);
+                RevHubOrientationOnRobot(logoDirection, usbDirection);
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         waitForStart();
 
-        while(opModeIsActive()) {
+        while (opModeIsActive()) {
             telemetryAprilTag();
 
-            if (gamepad1.aWasPressed()){
+            if (gamepad1.aWasPressed()) {
                 telemetry.addData("Mode", "Field");
                 isFieldOriented = true;
-            }
-            else if (gamepad1.bWasPressed()) {
+            } else if (gamepad1.bWasPressed()) {
                 telemetry.addData("Mode", "Robot");
                 isFieldOriented = false;
             }
-//            if (isFieldOriented) {
-//                driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-//            }
-//            else{
-//                drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-//            }
+
+            if (gamepad1.x) {
+                xpressed = true;
+            } else {
+                xpressed = false;
+            }
+
+
+            if (xpressed) {
+                autoAlign(autoAlignBearing);
+            } else {
+                if (isFieldOriented) {
+                    driveFieldOriented(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+                } else {
+                    drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+                }
+            }
             telemetry.update();
 
-            if (gamepad1.y){
+            if (gamepad1.y) {
                 imu.resetYaw();
             }
         }
     }
+
     public void drive(double forward, double right, double rotate) {
         double frontLeftPower = forward + right + rotate;
         double frontRightPower = forward - right - rotate;
@@ -151,7 +166,7 @@ public class Teleop extends LinearOpMode {
         backRightDrive.setPower(backRightPower);
     }
 
-    public void driveFieldOriented(double forward, double right, double rotate){
+    public void driveFieldOriented(double forward, double right, double rotate) {
         double theta = Math.atan2(forward, right);
         double r = Math.hypot(right, forward);
         theta = AngleUnit.normalizeRadians(theta - imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
@@ -160,7 +175,7 @@ public class Teleop extends LinearOpMode {
         drive(newForward, newRight, rotate);
     }
 
-    public void autoAlign(double bearing){
+    public void autoAlign(double bearing) {
         if (bearing > AUTO_ALIGN_BEARING_SETPOINT + AUTO_ALIGN_BEARING_ERROR) {
             drive(0, 0, 0.3);
         } else if (bearing < AUTO_ALIGN_BEARING_SETPOINT - AUTO_ALIGN_BEARING_ERROR) {
