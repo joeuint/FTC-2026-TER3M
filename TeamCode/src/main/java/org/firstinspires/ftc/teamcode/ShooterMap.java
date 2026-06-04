@@ -23,7 +23,7 @@ public class ShooterMap {
    }
 
    private double quadraticRegression(double x) {
-       return Math.pow(quadCoeff2 * x, 2) + quadCoeff1 * x + quadCoeff0;
+       return quadCoeff2 * Math.pow(x, 2) + quadCoeff1 * x + quadCoeff0;
    }
 
    public double predictPower(double distance) {
