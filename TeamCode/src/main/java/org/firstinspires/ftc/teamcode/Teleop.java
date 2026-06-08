@@ -25,6 +25,7 @@ public class Teleop extends LinearOpMode {
     DcMotor frontRightDrive;
     DcMotor backLeftDrive;
     DcMotor backRightDrive;
+    DcMotor intake;
 
     IMU imu;
 
@@ -32,6 +33,7 @@ public class Teleop extends LinearOpMode {
     final double AUTO_ALIGN_BEARING_ERROR = 4.0;
     boolean isFieldOriented = false;
     boolean xpressed = false;
+
 
     private double autoAlignBearing = 0.0;
 
@@ -98,6 +100,8 @@ public class Teleop extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "frontRight");
         backLeftDrive = hardwareMap.get(DcMotor.class, "backLeft");
         backRightDrive = hardwareMap.get(DcMotor.class, "backRight");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+
 
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -106,6 +110,7 @@ public class Teleop extends LinearOpMode {
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
@@ -146,6 +151,13 @@ public class Teleop extends LinearOpMode {
                     drive(gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
                 }
             }
+
+            intake.setPower(0.5);
+            if (gamepad1.leftTriggerWasPressed()){
+                intake.setPower(Math.abs(gamepad1.left_trigger));
+                telemetry.addData("Intake Power", intake.getPower());
+            }
+
             telemetry.update();
 
             if (gamepad1.y) {
@@ -182,6 +194,8 @@ public class Teleop extends LinearOpMode {
             drive(0, 0, -0.3);
         }
     }
+
+
 
 //    private double goalPID(double setpoint) {
 //
