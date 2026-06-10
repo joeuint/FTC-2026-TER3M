@@ -18,22 +18,26 @@ import java.util.Optional;
 
 @TeleOp
 public class Teleop extends LinearOpMode {
+    // April Tag
     AprilTagProcessor aprilTag;
     VisionPortal visionPortal;
 
+    // Robot Components
     DcMotor frontLeftDrive;
     DcMotor frontRightDrive;
     DcMotor backLeftDrive;
     DcMotor backRightDrive;
-
     IMU imu;
 
+    // Auto Align
     final double AUTO_ALIGN_BEARING_SETPOINT = 0.0;
     final double AUTO_ALIGN_BEARING_ERROR = 4.0;
-    boolean isFieldOriented = false;
-    boolean xpressed = false;
-
     private double autoAlignBearing = 0.0;
+
+    // Drive
+    boolean isFieldOriented = false;
+
+    boolean autoAlignEnabled = false;
 
     private void initApriltag() {
         aprilTag = new AprilTagProcessor.Builder()
@@ -131,13 +135,13 @@ public class Teleop extends LinearOpMode {
             }
 
             if (gamepad1.x) {
-                xpressed = true;
+                autoAlignEnabled = true;
             } else {
-                xpressed = false;
+                autoAlignEnabled = false;
             }
 
 
-            if (xpressed) {
+            if (autoAlignEnabled) {
                 autoAlign(autoAlignBearing);
             } else {
                 if (isFieldOriented) {
