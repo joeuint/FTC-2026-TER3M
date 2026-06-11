@@ -4,6 +4,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -27,6 +28,8 @@ public class Teleop extends LinearOpMode {
     DcMotor frontRightDrive;
     DcMotor backLeftDrive;
     DcMotor backRightDrive;
+    DcMotor intake;
+    DcMotor shooter;
     IMU imu;
 
     // Auto Align
@@ -102,9 +105,12 @@ public class Teleop extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "frontRight");
         backLeftDrive = hardwareMap.get(DcMotor.class, "backLeft");
         backRightDrive = hardwareMap.get(DcMotor.class, "backRight");
+        intake = hardwareMap.get(DcMotor.class, "intake");
+        shooter = hardwareMap.get(DcMotor.class, "shooter");
 
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -138,6 +144,18 @@ public class Teleop extends LinearOpMode {
                 autoAlignEnabled = true;
             } else {
                 autoAlignEnabled = false;
+            }
+
+            if (gamepad1.left_trigger > 0.1) {
+                intake.setPower(1.0);
+            } else {
+                intake.setPower(0.0);
+            }
+
+            if (gamepad1.right_trigger > 0.1) {
+                shooter.setPower(gamepad1.right_trigger);
+            } else {
+                shooter.setPower(0.0);
             }
 
 
