@@ -35,6 +35,7 @@ public class Teleop extends LinearOpMode {
     // Auto Align
     final double AUTO_ALIGN_BEARING_SETPOINT = 0.0;
     final double AUTO_ALIGN_BEARING_ERROR = 4.0;
+    final double AUTO_ALIGN_ROTATION_SPEED = 0.3;
     private double autoAlignBearing = 0.0;
 
     // Drive
@@ -42,6 +43,13 @@ public class Teleop extends LinearOpMode {
 
     boolean autoAlignEnabled = false;
 
+    /**
+     * AprilTag Initialization & Configuration
+     *
+     * <p>
+     * Does basic configuration and initialization of AprilTagProcessor and VisionPortal
+     * </p>
+     */
     private void initApriltag() {
         aprilTag = new AprilTagProcessor.Builder()
                 .build();
@@ -56,6 +64,15 @@ public class Teleop extends LinearOpMode {
         visionPortal = builder.build();
     }
 
+    /**
+     * Returns a string corresponding to the detected obelisk AprilTag
+     *
+     * <p>
+     * Filters through a list of all detections and filters out specific obelisk AprilTag ids
+     * </p>
+     * @param tagDetections A list of AprilTags to filter through
+     * @return obeliskValue The string value of the obelisk
+     */
     private Optional<String> checkObelisk(List<AprilTagDetection> tagDetections) {
         for (AprilTagDetection tag : tagDetections) {
             switch (tag.id) {
@@ -71,11 +88,20 @@ public class Teleop extends LinearOpMode {
         return Optional.empty();
     }
 
+    /**
+     * A helper method that stops the drivetrain
+     */
     private void resetDrive() {
         drive(0, 0, 0);
     }
 
-
+    /**
+     * Detects april tags and passes it off to autoalign and obelisk systems
+     *
+     * <p>
+     * Meant to be run in the main opMode loop. Main method for handling AprilTag detections
+     * </p>
+     */
     private void telemetryAprilTag() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         resetDrive();
@@ -95,6 +121,9 @@ public class Teleop extends LinearOpMode {
         telemetry.addData("# AprilTags Detected", currentDetections.size());
     }
 
+    /**
+     * Main OpMode loop
+     */
     @Override
     public void runOpMode() {
         initApriltag();
@@ -173,9 +202,24 @@ public class Teleop extends LinearOpMode {
             if (gamepad1.y) {
                 imu.resetYaw();
             }
+
+            if (gamepad1.dpad_down) {
+                shooter.setPower(-0.5);
+            }
         }
     }
 
+    /**
+     * Runs the mecanum drivetrain robot-oriented
+     *
+     * <p>
+     * Runs the drivetrain in a robot oriented way by determining the power to move in the specified
+     * vector
+     * </p>
+     * @param forward forward-backward vector
+     * @param right right-left vector
+     * @param rotate x rotation
+     */
     public void drive(double forward, double right, double rotate) {
         double frontLeftPower = forward + right + rotate;
         double frontRightPower = forward - right - rotate;
@@ -188,6 +232,18 @@ public class Teleop extends LinearOpMode {
         backRightDrive.setPower(backRightPower);
     }
 
+    /**
+     * Runs the mecanum drivetrain field-oriented
+     *
+     * <p>
+     * This method uses trigonometry to determine where the robot wants to go based on the imu values.
+     * <br>
+     * <b>Passes the power to the existing drive function for robot-oriented</b>
+     * </p>
+     * @param forward
+     * @param right
+     * @param rotate
+     */
     public void driveFieldOriented(double forward, double right, double rotate) {
         double theta = Math.atan2(forward, right);
         double r = Math.hypot(right, forward);
@@ -197,19 +253,19 @@ public class Teleop extends LinearOpMode {
         drive(newForward, newRight, rotate);
     }
 
+    /**
+     * Attempts to align with the bearing of an april tag
+     *
+     * <p>
+     * Uses a bang-bang controller to reach the setpoint within a specified setpoint a tolerance
+     * </p>
+     * @param bearing
+     */
     public void autoAlign(double bearing) {
         if (bearing > AUTO_ALIGN_BEARING_SETPOINT + AUTO_ALIGN_BEARING_ERROR) {
-            drive(0, 0, 0.3);
+            drive(0, 0, AUTO_ALIGN_ROTATION_SPEED);
         } else if (bearing < AUTO_ALIGN_BEARING_SETPOINT - AUTO_ALIGN_BEARING_ERROR) {
-            drive(0, 0, -0.3);
+            drive(0, 0, -AUTO_ALIGN_ROTATION_SPEED);
         }
     }
-
-//    private double goalPID(double setpoint) {
-//
-//    }
-
-//    private double getYawToGoal() {
-//
-//    }
 }
