@@ -130,6 +130,7 @@ public class Teleop extends LinearOpMode {
 
         telemetry.addData("Mode", "Robot");
 
+        // Hardware initialization
         frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRightDrive = hardwareMap.get(DcMotor.class, "frontRight");
         backLeftDrive = hardwareMap.get(DcMotor.class, "backLeft");
@@ -137,15 +138,18 @@ public class Teleop extends LinearOpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         shooter = hardwareMap.get(DcMotor.class, "shooter");
 
+        // Reversed motors that are mounted in opposite directions
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        // Set drivetrain motors to run using encoders
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        // Initialized the IMU with the robot's hub orientation
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection =
                 RevHubOrientationOnRobot.LogoFacingDirection.UP;
@@ -161,6 +165,7 @@ public class Teleop extends LinearOpMode {
         while (opModeIsActive()) {
             telemetryAprilTag();
 
+            // Switches between field-oriented and robot-oriented driving
             if (gamepad1.aWasPressed()) {
                 telemetry.addData("Mode", "Field");
                 isFieldOriented = true;
@@ -169,18 +174,21 @@ public class Teleop extends LinearOpMode {
                 isFieldOriented = false;
             }
 
+            // Auto-align is enabled while X is held
             if (gamepad1.x) {
                 autoAlignEnabled = true;
             } else {
                 autoAlignEnabled = false;
             }
 
+            // Left trigger runs the intake
             if (gamepad1.left_trigger > 0.1) {
                 intake.setPower(1.0);
             } else {
                 intake.setPower(0.0);
             }
 
+            // Right trigger controls the speed of the shooter
             if (gamepad1.right_trigger > 0.1) {
                 shooter.setPower(gamepad1.right_trigger);
             } else {
@@ -188,6 +196,7 @@ public class Teleop extends LinearOpMode {
             }
 
 
+            // Drive is disabled when auto-align is enabled
             if (autoAlignEnabled) {
                 autoAlign(autoAlignBearing);
             } else {
@@ -199,10 +208,12 @@ public class Teleop extends LinearOpMode {
             }
             telemetry.update();
 
+            // Reset heading when Y is pressed
             if (gamepad1.y) {
                 imu.resetYaw();
             }
 
+            // Reverse shooter to clear jams
             if (gamepad1.dpad_down) {
                 shooter.setPower(-0.5);
             }
