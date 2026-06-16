@@ -104,7 +104,6 @@ public class Teleop extends LinearOpMode {
      */
     private void telemetryAprilTag() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        resetDrive();
 
         for (AprilTagDetection tag : currentDetections) {
             telemetry.addData("Detected ID", tag.id);
@@ -198,6 +197,7 @@ public class Teleop extends LinearOpMode {
 
             // Drive is disabled when auto-align is enabled
             if (autoAlignEnabled) {
+                resetDrive();
                 autoAlign(autoAlignBearing);
             } else {
                 if (isFieldOriented) {
